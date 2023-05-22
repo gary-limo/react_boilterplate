@@ -4,30 +4,78 @@ const Example = () => {
   const [tableData, setTableData] = useState(data);
   const [filteredData, setFilteredData] = useState(data);
   const [searchQuery, setSearchQuery] = useState('');
+  const [editingRow, setEditingRow] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
 
-  const handleSaveRowEdits = async ({ row, values }) => {
-    if (!Object.keys(validationErrors).length) {
-      const updatedData = tableData.map((item, index) =>
-        index === row.index ? values : item
-      );
-      setTableData(updatedData);
-      setFilteredData(updatedData);
-    }
-  };
+  const handleSaveRowEdits = useCallback(
+    (rowIndex) => {
+      if (!Object.keys(validationErrors).length) {
+        setEditingRow(null);
+        setTableData((prevData) => {
+          const updatedData = [...prevData];
+          updatedData[rowIndex].isEditing = false;
+          return updatedData;
+        });
+        setFilteredData((prevData) => {
+          const updatedData = [...prevData];
+          updatedData[rowIndex].isEditing = false;
+          return updatedData;
+        });
+      }
+    },
+    [validationErrors]
+  );
 
-  const handleCancelRowEdits = () => {
-    setValidationErrors({});
-  };
+  const handleCancelRowEdits = useCallback(
+    (rowIndex) => {
+      setEditingRow(null);
+      setTableData((prevData) => {
+        const updatedData = [...prevData];
+        updatedData[rowIndex].isEditing = false;
+        return updatedData;
+      });
+      setFilteredData((prevData) => {
+        const updatedData = [...prevData];
+        updatedData[rowIndex].isEditing = false;
+        return updatedData;
+      });
+      setValidationErrors({});
+    },
+    []
+  );
+
+  const handleEditRow = useCallback(
+    (rowIndex) => {
+      setEditingRow(rowIndex);
+      setTableData((prevData) => {
+        const updatedData = [...prevData];
+        updatedData[rowIndex].isEditing = true;
+        return updatedData;
+      });
+      setFilteredData((prevData) => {
+        const updatedData = [...prevData];
+        updatedData[rowIndex].isEditing = true;
+        return updatedData;
+      });
+    },
+    []
+  );
 
   const handleDeleteRow = useCallback(
-    (row) => {
-      if (!window.confirm(`Are you sure you want to delete ${row.firstName}?`)) {
+    (rowIndex) => {
+      if (!window.confirm(`Are you sure you want to delete ${tableData[rowIndex].firstName}?`)) {
         return;
       }
-      const updatedData = tableData.filter((item, index) => index !== row.index);
-      setTableData(updatedData);
-      setFilteredData(updatedData);
+      setTableData((prevData) => {
+        const updatedData = [...prevData];
+        updatedData.splice(rowIndex, 1);
+        return updatedData;
+      });
+      setFilteredData((prevData) => {
+        const updatedData = [...prevData];
+        updatedData.splice(rowIndex, 1);
+        return updatedData;
+      });
     },
     [tableData]
   );
@@ -36,17 +84,35 @@ const Example = () => {
     (event) => {
       const { value } = event.target;
       setSearchQuery(value);
-      const filteredData = tableData.filter((row) =>
-        row.id.toString().includes(value) ||
-        row.firstName.toLowerCase().includes(value.toLowerCase())
+      const filteredData = tableData.filter(
+        (row) =>
+          row.id.toString().includes(value) ||
+          row.firstName.toLowerCase().includes(value.toLowerCase())
       );
       setFilteredData(filteredData);
     },
     [tableData]
   );
 
+  const handleInputChange = useCallback(
+    (event, rowIndex, columnKey) => {
+      const { value } = event.target;
+      setTableData((prevData) => {
+        const updatedData = [...prevData];
+        updatedData[rowIndex][columnKey] = value;
+        return updatedData;
+      });
+      setFilteredData((prevData) => {
+        const updatedData = [...prevData];
+        updatedData[rowIndex][columnKey] = value;
+        return updatedData;
+      });
+    },
+    []
+  );
+
   const getCommonEditInputProps = useCallback(
-    (cell) => {
+    (cell, rowIndex) => {
       return {
         className: validationErrors[cell.id] ? 'error' : '',
         onBlur: (event) => {
@@ -63,9 +129,11 @@ const Example = () => {
             }));
           }
         },
+        value: tableData[rowIndex][cell.column.accessorKey] || '',
+        onChange: (event) => handleInputChange(event, rowIndex, cell.column.accessorKey),
       };
     },
-    [validationErrors]
+    [tableData, handleInputChange, validationErrors]
   );
 
   const columns = useMemo(
@@ -78,12 +146,13 @@ const Example = () => {
 
   return (
     <>
-      <div className="search-bar">
+      <div className="search-bar-container">
         <input
           type="text"
           placeholder="Search..."
           value={searchQuery}
           onChange={handleSearch}
+          className="search-bar"
         />
       </div>
       <table>
@@ -100,32 +169,28 @@ const Example = () => {
             <tr key={row.id}>
               {columns.map((column) => (
                 <td key={column.accessorKey}>
-                  <input
-                    type="text"
-                    value={row[column.accessorKey]}
-                    {...getCommonEditInputProps({
-                      id: column.accessorKey,
-                      column,
-                    })}
-                    onChange={(event) => {
-                      const { value } = event.target;
-                      setTableData((prevData) => {
-                        const updatedData = [...prevData];
-                        updatedData[rowIndex][column.accessorKey] = value;
-                        return updatedData;
-                      });
-                    }}
-                  />
+                  {row.isEditing ? (
+                    <input
+                      type="text"
+                      {...getCommonEditInputProps({ id: column.accessorKey, column }, rowIndex)}
+                    />
+                  ) : (
+                    row[column.accessorKey]
+                  )}
                 </td>
               ))}
               <td>
-                <button onClick={() => handleSaveRowEdits({ row, values: row })}>
-                  Save
-                </button>
-                <button onClick={handleCancelRowEdits}>Cancel</button>
-                <button onClick={() => handleDeleteRow({ index: rowIndex, ...row })}>
-                  Delete
-                </button>
+                {row.isEditing ? (
+                  <>
+                    <button onClick={() => handleSaveRowEdits(rowIndex)}>Save</button>
+                    <button onClick={() => handleCancelRowEdits(rowIndex)}>Cancel</button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => handleEditRow(rowIndex)}>Edit</button>
+                    <button onClick={() => handleDeleteRow(rowIndex)}>Delete</button>
+                  </>
+                )}
               </td>
             </tr>
           ))}
@@ -136,9 +201,9 @@ const Example = () => {
 };
 
 const data = [
-  { id: 1, firstName: 'John' },
-  { id: 2, firstName: 'Jane' },
-  { id: 3, firstName: 'Mike' },
+  { id: 1, firstName: 'John', isEditing: false },
+  { id: 2, firstName: 'Jane', isEditing: false },
+  { id: 3, firstName: 'Mike', isEditing: false },
 ];
 
 const validateRequired = (value) => !!value.length;

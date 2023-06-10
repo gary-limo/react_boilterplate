@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+
 const MyForm = () => {
   const [activeStep, setActiveStep] = useState(1);
   const [formData, setFormData] = useState({
@@ -27,7 +28,7 @@ const MyForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     // Handle form submission logic here
-    
+
     console.log(formData);
   };
 
@@ -43,165 +44,62 @@ const MyForm = () => {
     switch (activeStep) {
       case 1:
         return (
-          <div className="form-column">
-            <div className="form-group">
-              <label htmlFor="firstName">First Name</label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                required
-              />
+          <div className="form-row">
+            <div className="form-column" style={{ marginRight: '20px' }}>
+              <div className="form-group">
+                <label htmlFor="firstName">First Name</label>
+                <input
+                  type="text"
+                  id="firstName"
+                  name="firstName"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="lastName">Last Name</label>
+                <input
+                  type="text"
+                  id="lastName"
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
-
-            {/* Repeat the same structure for other fields */}
-            <div className="form-group">
-              <label htmlFor="lastName">Last Name</label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="email">Email</label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="phoneNumber">Phone Number</label>
-              <input
-                type="tel"
-                id="phoneNumber"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-        );
-      case 2:
-        return (
-          <div className="form-column">
-            <div className="form-group">
-              <label htmlFor="address">Address</label>
-              <input
-                type="text"
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="city">City</label>
-              <input
-                type="text"
-                id="city"
-                name="city"
-                value={formData.city}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="state">State</label>
-              <input
-                type="text"
-                id="state"
-                name="state"
-                value={formData.state}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="country">Country</label>
-              <input
-                type="text"
-                id="country"
-                name="country"
-                value={formData.country}
-                onChange={handleChange}
-                required
-              />
+            <div className="form-column">
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="phoneNumber">Phone Number</label>
+                <input
+                  type="tel"
+                  id="phoneNumber"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
             </div>
           </div>
         );
-      case 3:
-        return (
-          <div className="form-column">
-            <div className="form-group">
-              <label htmlFor="occupation">Occupation</label>
-              <select
-                id="occupation"
-                name="occupation"
-                value={formData.occupation}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Occupation</option>
-                <option value="engineer">Engineer</option>
-                <option value="teacher">Teacher</option>
-                <option value="doctor">Doctor</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="industry">Industry</label>
-              <select
-                id="industry"
-                name="industry"
-                value={formData.industry}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Industry</option>
-                <option value="it">IT</option>
-                <option value="finance">Finance</option>
-                <option value="healthcare">Healthcare</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="experience">Experience</label>
-              <select
-                id="experience"
-                name="experience"
-                value={formData.experience}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select Experience</option>
-                <option value="0-1">0-1 years</option>
-                <option value="1-3">1-3 years</option>
-                <option value="3+">3+ years</option>
-              </select>
-            </div>
-          </div>
-        );
-      default:
-        return null;
+      // ...remaining cases and other functions
     }
   };
+
+  // ...remaining form structure
 
   return (
     <div className="my-form-container">
@@ -210,7 +108,7 @@ const MyForm = () => {
         <div className={`step-dot ${activeStep === 2 ? 'active' : ''}`} />
         <div className={`step-dot ${activeStep === 3 ? 'active' : ''}`} />
       </div>
-      <h1 className="form-title"> </h1>
+      <h1 className="form-title">My Form</h1>
       <form className="my-form" onSubmit={handleSubmit}>
         {renderFormStep()}
 
@@ -225,9 +123,7 @@ const MyForm = () => {
               Next
             </button>
           )}
-          {activeStep === 3 && (
-            <button type="submit">Submit</button>
-          )}
+          {activeStep === 3 && <button type="submit">Submit</button>}
         </div>
       </form>
 
@@ -247,13 +143,20 @@ const MyForm = () => {
             justify-content: space-between;
           }
 
+          .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 20px;
+          }
+
           .form-column {
             flex: 1;
-            margin-right: 20px;
+            margin-bottom: 20px;
           }
 
           .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             width: 100%;
           }
 
@@ -269,8 +172,9 @@ const MyForm = () => {
             border: 1px solid #ccc;
             border-radius: 4px;
             font-size: 16px;
-            width: 100%; /* Change to 100% width */
+            width: 100%;
             box-sizing: border-box;
+            margin-bottom: 10px; /* Add margin-bottom for spacing */
           }
 
           button[type='submit'],
@@ -291,7 +195,7 @@ const MyForm = () => {
 
           .button-group {
             display: flex;
-            justify-content: space-between; /* Adjust spacing between buttons */
+            justify-content: space-between;
             align-items: center;
           }
 
